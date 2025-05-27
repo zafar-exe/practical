@@ -1,0 +1,55 @@
+pipeline {
+    agent any
+    
+    environment {
+        // Define any environment variables here
+        APP_ENV = 'production'
+    }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                // Clone your repo
+                git url: 'https://github.com/your-repo.git', branch: 'main'
+            }
+        }
+        
+        stage('Build') {
+            steps {
+                // Example build step
+                sh 'make build'
+            }
+        }
+        
+        stage('Test') {
+            steps {
+                // Run tests
+                sh 'make test'
+            }
+            post {
+                always {
+                    junit 'reports/*.xml'  // Publish test results
+                }
+            }
+        }
+        
+        stage('Deploy') {
+            when {
+                branch 'main'  // Only deploy on main branch
+            }
+            steps {
+                // Deploy step
+                sh './deploy.sh'
+            }
+        }
+    }
+    
+    post {
+        success {
+            echo 'Pipeline succeeded!'
+        }
+        failure {
+            echo 'Pipeline failed!'
+        }
+    }
+}
